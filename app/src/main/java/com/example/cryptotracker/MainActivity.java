@@ -14,6 +14,11 @@ import com.example.cryptotracker.databinding.ActivityMainBinding;
 import com.example.cryptotracker.model.Coin;
 import com.example.cryptotracker.utils.ApiException;
 
+import com.example.cryptotracker.database.dao.WatchlistDao;
+import com.example.cryptotracker.database.entities.WatchlistCoinCrossRef;
+import com.example.cryptotracker.database.entities.WatchlistEntity;
+
+
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,6 +37,9 @@ public class MainActivity extends AppCompatActivity {
      */
 
     private CoinDao coinDao; // coinDao ще използваме за работа с таблицата coins.
+
+    private WatchlistDao watchlistDao; // watchlistDao ще използваме за работа с watchlists и връзката watchlist -> coin.
+
     private ExecutorService databaseExecutor; // databaseExecutor ще използваме, за да пускаме database операции във background thread.
 
     @Override
@@ -46,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
         CryptoDatabase database = CryptoDatabase.getInstance(this); // Вземи database instance.
         coinDao = database.coinDao(); // Вземи CoinDao от базата.
+        watchlistDao = database.watchlistDao(); // // Вземи WatchlistDao от базата.
 
         databaseExecutor = Executors.newSingleThreadExecutor(); // Създай един background thread за database работа.
 
@@ -163,6 +172,8 @@ public class MainActivity extends AppCompatActivity {
              */
 
             loadCoinsFromDatabase();
+            testWatchlistDatabase();
+
 
         });
     }
@@ -174,6 +185,38 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(() -> { // runOnUiThread(() -> {
 
                 binding.apiResultTextView.append("\n\nSaved in Room: " + savedCoins.size() + " coins");
+            });
+        });
+    }
+
+    private void testWatchlistDatabase() {
+    /*
+    Това е временен тест за watchlist частта.
+    Целта е да проверим дали можем:
+    1. да създадем watchlist
+    2. да добавим coin към него
+    3. да прочетем coins от този watchlist
+     */
+
+        databaseExecutor.execute(() -> { // Room операции се правят във background thread, за да не блокират UI.
+            Long now = System.currentTimeMillis(); // Взимаме текущото време, за да го запишем като createdAt/updatedAt.
+
+            WatchlistEntity favorites = new WatchlistEntity("Favorites", now, now); // Създаваме нов watchlist с име Favorites.
+
+            long watchlistId = watchlistDao.insertWatchlist(favorites); // Записваме watchlist-а в Room и получаваме неговото auto-generated id.
+
+            WatchlistCoinCrossRef bitcoinInFavorites = new WatchlistCoinCrossRef(
+                    watchlistId,
+                    "bitcoin",
+                    now
+            ); // Създаваме връзка: този watchlist съдържа coin с id bitcoin.
+
+            watchlistDao.addCoinToWatchlist(bitcoinInFavorites); // Записваме връзката в таблицата watchlist_coin_cross_ref.
+
+            int coinCount = watchlistDao.getCoinCountForWatchlist(watchlistId); // Проверяваме колко coins има в този watchlist.
+
+            runOnUiThread(() -> { // Връщаме се на main thread, защото ще променяме TextView.
+                binding.apiResultTextView.append("\n\nWatchlist test: Favorites has " + coinCount + " coin(s)");
             });
         });
     }
