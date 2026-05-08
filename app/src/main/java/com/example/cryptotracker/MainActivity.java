@@ -1,8 +1,6 @@
 package com.example.cryptotracker;
 
 import android.os.Bundle;
-import android.view.View;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -39,8 +37,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadMarketCoins() {
-        binding.statusTextView.setVisibility(View.VISIBLE); // Показваме status текста, докато зареждаме.
-        binding.statusTextView.setText("Loading coins..."); // Ясно казваме на потребителя какво става.
+        coinAdapter.showLoading(); // Показваме loading ред вътре в списъка.
 
         cryptoRepository.loadMarketCoins(new CryptoRepository.RepositoryCallback<List<Coin>>() {
             @Override
@@ -56,20 +53,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showCoins(List<Coin> coins) {
-        if (coins == null || coins.isEmpty()) { // Ако списъкът е празен, няма какво да покажем в RecyclerView.
-            coinAdapter.setCoins(null); // Изчистваме RecyclerView.
-            binding.statusTextView.setVisibility(View.VISIBLE); // Показваме текст вместо празен екран.
-            binding.statusTextView.setText("No coins available.");
-            return;
-        }
-
-        binding.statusTextView.setVisibility(View.GONE); // Скриваме loading текста, защото вече имаме данни.
-        coinAdapter.setCoins(coins); // Даваме coins на adapter-а, а adapter-ът ги показва в RecyclerView.
+        coinAdapter.showCoins(coins); // Adapter-ът сам решава дали да покаже coins или empty ред.
     }
 
     private void showError(String message) {
-        coinAdapter.setCoins(null); // Ако няма данни, RecyclerView остава празен.
-        binding.statusTextView.setVisibility(View.VISIBLE); // Показваме грешката видимо, не като кратък Toast.
-        binding.statusTextView.setText(message); // Например network/API error.
+        coinAdapter.showError(message); // Показваме error ред вътре в списъка.
     }
 }
