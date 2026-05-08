@@ -24,8 +24,8 @@ public class Coin {
     public Coin() {
     }
 
-    public Coin(String id, String symbol, String name, String image, double currentPrice,
-                long marketCap, long totalVolume, double priceChangePercentage24h) {
+    public Coin(String id, String symbol, String name, String image, Double currentPrice,
+                Long marketCap, Long totalVolume, Double priceChangePercentage24h) {
         this.id = id;
         this.symbol = symbol;
         this.name = name;
@@ -52,19 +52,19 @@ public class Coin {
         return image;
     }
 
-    public double getCurrentPrice() {
+    public Double getCurrentPrice() {
         return currentPrice;
     }
 
-    public long getMarketCap() {
+    public Long getMarketCap() {
         return marketCap;
     }
 
-    public long getTotalVolume() {
+    public Long getTotalVolume() {
         return totalVolume;
     }
 
-    public double getPriceChangePercentage24h() {
+    public Double getPriceChangePercentage24h() {
         return priceChangePercentage24h;
     }
 
@@ -84,19 +84,19 @@ public class Coin {
         this.image = image;
     }
 
-    public void setCurrentPrice(double currentPrice) {
+    public void setCurrentPrice(Double currentPrice) {
         this.currentPrice = currentPrice;
     }
 
-    public void setMarketCap(long marketCap) {
+    public void setMarketCap(Long marketCap) {
         this.marketCap = marketCap;
     }
 
-    public void setTotalVolume(long totalVolume) {
+    public void setTotalVolume(Long totalVolume) {
         this.totalVolume = totalVolume;
     }
 
-    public void setPriceChangePercentage24h(double priceChangePercentage24h) {
+    public void setPriceChangePercentage24h(Double priceChangePercentage24h) {
         this.priceChangePercentage24h = priceChangePercentage24h;
     }
 }
