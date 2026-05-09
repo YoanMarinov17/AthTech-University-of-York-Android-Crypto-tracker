@@ -1,7 +1,5 @@
 package com.example.cryptotracker.api;
 
-
-
 import java.io.IOException;
 
 import okhttp3.Interceptor;
@@ -9,55 +7,55 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class RetryInterceptor implements Interceptor {
-// Ако заявката се провали, не се отказваме веднага. Пробваме пак след малко. Това се нарича exponential backoff
+    // Ако заявката се провали временно, пробваме пак след малко.
+    // Това се нарича exponential backoff: 1 секунда, после 2, после 4.
 
     private static final int MAX_RETRIES = 3;
     private static final long INITIAL_DELAY_MS = 1000; // 1000ms = 1 sec
 
     @Override
     public Response intercept(Chain chain) throws IOException {
-        Request request = chain.request(); // Тук взимаме текущата заявка. = GET /coins/markets
+        Request request = chain.request(); // Взимаме текущата заявка. Пример: GET /coins/markets
 
-        IOException lastException = null; // lastException пази последната network грешка, ако има такава.
-
-        Response response = null; // response пази последния response, ако сървърът е върнал нещо.
+        IOException lastException = null; // Тук пазим последната network грешка, ако има такава.
 
         for (int attempt = 0; attempt <= MAX_RETRIES; attempt++) {
             try {
-                response = chain.proceed(request); // Това изпраща заявката нататък.
-
+                Response response = chain.proceed(request); // Изпращаме заявката.
 
                 /*
-                Ако response е успешен, върни го.
-                Или ако response кодът не е от тези, които си струва да retry-ваме, пак го върни.
+                Ако response е успешен, го връщаме веднага.
+                Ако status code не е подходящ за retry, пак го връщаме.
                  */
                 if (response.isSuccessful() || !shouldRetry(response.code())) {
                     return response;
                 }
-                response.close();
-            } catch (IOException exception) {
+
                 /*
-                Тук влизаме ако има проблем като:
-                няма интернет;
-                timeout;
-                connection failure.
+                Ако това е последният опит, не затваряме response-а.
+                Връщаме го към ErrorInterceptor, за да направи хубаво error message.
                  */
-                lastException = exception; // Запазваме последната грешка.
+                if (attempt == MAX_RETRIES) {
+                    return response;
+                }
+
+                response.close(); // Затваряме неуспешния response преди следващия retry.
+            } catch (IOException exception) {
+                lastException = exception; // Например: няма интернет, timeout, connection problem.
+
+                if (attempt == MAX_RETRIES) {
+                    throw lastException; // Ако няма повече опити, връщаме последната грешка.
+                }
             }
 
-            if (attempt < MAX_RETRIES) {
-                waitBeforeRetry(attempt);
-            }
+            waitBeforeRetry(attempt); // Изчакваме малко преди следващия опит.
         }
 
-        if (lastException != null) {
-            throw lastException; // Ако имаме вече грешка, която е записана малко по-горе, хвърли я
-        }
-
-        return response;
+        throw new IOException("Request failed after retries");
     }
 
     private boolean shouldRetry(int statusCode) {
+        // Тези status codes обикновено са временни проблеми.
         return statusCode == 408 ||
                 statusCode == 429 ||
                 statusCode == 500 ||
@@ -70,10 +68,10 @@ public class RetryInterceptor implements Interceptor {
         long delay = INITIAL_DELAY_MS * (long) Math.pow(2, attempt);
 
         try {
-            Thread.sleep(delay); // Това кара текущия background thread да изчака.
+            Thread.sleep(delay); // Спираме само background thread-а, не UI thread-а.
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
-            throw new IOException("Retry interrupted", exception); // Thread-ът беше прекъснат, спри retry логиката и хвърли IOException.
+            throw new IOException("Retry interrupted", exception);
         }
     }
 }
