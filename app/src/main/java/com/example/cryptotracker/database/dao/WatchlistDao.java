@@ -45,4 +45,14 @@ public interface WatchlistDao {
 
     @Query("SELECT COUNT(*) FROM watchlist_coin_cross_ref WHERE watchlistId = :watchlistId") // Преброй колко coins има в даден watchlist.
     int getCoinCountForWatchlist(long watchlistId);
+
+    @Query("SELECT * FROM watchlists WHERE name = :name LIMIT 1")
+    WatchlistEntity getWatchlistByName(String name);
+
+    @Query("SELECT COUNT(*) FROM watchlist_coin_cross_ref WHERE watchlistId = :watchlistId AND coinId = :coinId")
+    int isCoinInWatchlist(long watchlistId, String coinId);
+
+    @Query("SELECT coinId FROM watchlist_coin_cross_ref WHERE watchlistId = :watchlistId")
+    List<String> getCoinIdsForWatchlist(long watchlistId);
+
 }

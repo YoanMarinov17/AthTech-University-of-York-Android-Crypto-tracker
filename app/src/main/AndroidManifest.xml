@@ -15,6 +15,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Cryptotracker">
         <activity
+            android:name=".CoinDetailActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

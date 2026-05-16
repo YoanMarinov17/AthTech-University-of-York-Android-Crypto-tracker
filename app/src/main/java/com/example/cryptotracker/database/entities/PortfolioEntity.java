@@ -2,6 +2,7 @@ package com.example.cryptotracker.database.entities;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 @Entity(tableName = "portfolio") // Казваме на Room, че този клас ще бъде таблица с име portfolio.
@@ -24,6 +25,7 @@ public class PortfolioEntity {
     public PortfolioEntity() {
     }
 
+    @Ignore
     public PortfolioEntity(@NonNull String coinId, Double amount, Double averageBuyPrice, Long createdAt, Long updatedAt) {
         this.coinId = coinId;
         this.amount = amount;

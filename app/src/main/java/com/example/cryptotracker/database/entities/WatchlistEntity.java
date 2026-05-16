@@ -1,6 +1,7 @@
 package com.example.cryptotracker.database.entities;
 
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 @Entity(tableName = "watchlists")
@@ -16,6 +17,7 @@ public class WatchlistEntity {
     public WatchlistEntity() {
     }
 
+    @Ignore
     public WatchlistEntity(String name, Long createdAt, Long updatedAt) {
         this.name = name;
         this.createdAt = createdAt;

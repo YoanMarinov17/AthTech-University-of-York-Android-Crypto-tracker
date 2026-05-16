@@ -2,6 +2,7 @@ package com.example.cryptotracker.database.entities;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 
 @Entity(
         tableName = "watchlist_coin_cross_ref",
@@ -20,6 +21,7 @@ public class WatchlistCoinCrossRef {
         coinId = "";
     }
 
+    @Ignore
     public WatchlistCoinCrossRef(long watchlistId, @NonNull String coinId, Long addedAt) {
         this.watchlistId = watchlistId;
         this.coinId = coinId;

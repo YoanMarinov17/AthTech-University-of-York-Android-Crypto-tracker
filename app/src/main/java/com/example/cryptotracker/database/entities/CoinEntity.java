@@ -2,6 +2,7 @@ package com.example.cryptotracker.database.entities;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 @Entity(tableName = "coins")
@@ -23,6 +24,7 @@ public class CoinEntity {
     public CoinEntity() {
     }
 
+    @Ignore
     public CoinEntity(@NonNull String id, String symbol, String name, String image,
                       Double currentPrice, Long marketCap, Long totalVolume,
                       Double priceChangePercentage24h, Long lastUpdated) {
